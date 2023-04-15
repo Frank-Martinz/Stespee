@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="height: 600px">
+    <div>
+        <div class="name-product">
+            <p>{{ item.name }}</p>
+        </div>
+        <div class="raiting-in-card">
+            {% for star in raiting %}
+            <ion-icon name="{{ star }}"></ion-icon>
+            {% endfor %}
+            Отзывов:
+        </div>
+        <div style="float: left; width: 50%;">
+            <p style="text-align: center">
+                <img src="{{ image }}" alt="Тут должна была быть картинка" class="product-card">
+            </p>
+        </div>
+        <div class="info-about-product">
+            <div>
+                <p class="price-in-card" style="">{{ item.cost }}₽</p>
+            </div>
+            <form method="POST">
+                <button type="submit" class="buy-button">Купить</button>
+            </form>
+            <div>
+                <p style="margin-top: 20px; margin-left: 40px; font-size: 18px; margin-left: 50px;">{{ item.info }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="background: #0000ff; width: 100%">
+    raiting
+</div>
+{% endblock%}

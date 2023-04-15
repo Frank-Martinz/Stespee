@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form style="margin-left: 40%; margin-right: 40%; margin-top: 10px;" action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p class="basic_font">
+        {{ form.login.label }}<br>
+        {{ form.login(class="form-control for_forms") }}<br>
+        {% for error in form.login.errors %}
+    <div class="alert alert-danger errors" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+    <p class="basic_font">
+        {{ form.password.label }}<br>
+        {{ form.password(class="form-control for_forms", type="password") }}<br>
+        {% for error in form.password.errors %}
+    <div class="alert alert-danger errors" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+    <p class="basic_font">{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+    <p>{{ form.submit(type="submit", class="basic_font") }}</p>
+    <p>{{ message }}</p>
+</form>
+{% endblock %}
