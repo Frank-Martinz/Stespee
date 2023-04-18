@@ -1,10 +1,11 @@
 from flask import Flask, render_template, redirect, url_for, request
-from flask_login import LoginManager, login_user
+from flask_login import LoginManager, login_user, current_user, logout_user
 from forms.loginform import LoginForm
 from forms.registform import RegistrationForm
 from data import db_session
 from data.users import User
 from data.products import Product
+from data.carts import Cart
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'pfybvfqntcmcgjhnfvvfkmxbrbbltdjxrb'
@@ -112,6 +113,89 @@ def show_account():
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == id).first()
     return render_template('account.html', item=user)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect('/')
+
+
+@app.route('/cart')
+def cart():
+    if current_user.is_authenticated:
+        db_sess = db_session.create_session()
+        user_cart = db_sess.query(Cart).filter(Cart.user_id == current_user.id).first()
+        if user_cart.products == '{}':
+            return render_template('cart.html', show_smth=False)
+        else:
+            print(user_cart.products)
+            prods = create_dict_of_prod(user_cart.products)
+            products = db_sess.query(Product).filter(Product.id.in_(list(prods.keys()))).all()
+            amount = count_whole_cost(prods)
+            items = []
+            for item in products:
+                items.append([current_user.id, prods[item.id], item, url_for('static', filename=item.image)])
+            return render_template('cart.html', items=items, show_smth=True, amount=amount)
+    else:
+        return redirect('/login')
+
+
+@app.route('/add/<int:user_id>/<int:product_id>/<int:tp>', methods=['POST'])
+def add(user_id, product_id, tp):
+    db_sess = db_session.create_session()
+    user_cart = db_sess.query(Cart).filter(Cart.user_id == user_id).first()
+    if user_cart.products == '{}':
+        prods = {product_id: 1}
+    else:
+        prods = create_dict_of_prod(user_cart.products)
+        prods[product_id] += 1
+    amount = count_whole_cost(prods)
+    user_cart.products = str(prods)
+    user_cart.amount = int(amount)
+    db_sess.commit()
+    if tp == 1:
+        return redirect('/cart')
+    return redirect(f'/product/{product_id}')
+
+
+@app.route('/minus/<int:user_id>/<int:product_id>', methods=['POST'])
+def minus(user_id, product_id):
+    db_sess = db_session.create_session()
+    user_cart = db_sess.query(Cart).filter(Cart.user_id == user_id).first()
+    prods = create_dict_of_prod(user_cart.products)
+    prods[product_id] -= 1
+    if prods[product_id] == 0:
+        prods.pop(product_id)
+    amount = count_whole_cost(prods)
+    user_cart.products = str(prods)
+    user_cart.amount = int(amount)
+    db_sess.commit()
+    return redirect('/cart')
+
+
+def create_dict_of_prod(products: str):
+    products = products[1:-1]
+    if ', ' in products:
+        prods = products.split(', ')
+        a = dict()
+        for prod in prods:
+            pp = prod.split(': ')
+            a[int(pp[0])] = int(pp[1])
+    else:
+        a = dict()
+        pp = products.split(': ')
+        a[int(pp[0])] = int(pp[1])
+    return a
+
+
+def count_whole_cost(prods_in_cart):
+    db_sess = db_session.create_session()
+    amount = 0
+    for key in prods_in_cart:
+        result = db_sess.query(Product).filter(Product.id == key).first()
+        amount += result.cost * prods_in_cart[key]
+    return amount
 
 
 if __name__ == '__main__':

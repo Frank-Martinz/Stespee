@@ -22,14 +22,24 @@
                     <li><a href="/">Всё</a></li>
                 </ul>
             </li>
+            {% if current_user.is_authenticated %}
+            <li><a href="/account">{{ current_user.name }}</a>
+                <ul>
+                    <li><a href="/account">Информация</a></li>
+                    <li><a href="/logout">Выйти</a></li>
+                </ul>
+            </li>
+            {% else %}
             <li><a href="#">Аккаунт</a>
                 <ul>
                     <li><a href="/login">Войти</a></li>
                     <li><a href="/registration">Зарегестироваться</a></li>
                 </ul>
             </li>
+            {% endif %}
             <li><a href="#">Заказы</a></li>
-            <li><a href="#">Корзина</a></li>
+            <li><a href="/cart">Корзина</a></li>
+
         </ul>
     </nav>
 </header>
