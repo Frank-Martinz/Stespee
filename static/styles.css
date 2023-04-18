@@ -1,0 +1,177 @@
+.upper_field{
+    border: 4px solid black;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    opacity: 1;
+}
+
+.lower_field{
+    position: relative;
+    top: 75px;
+}
+
+header {
+    z-index: 10;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8%;
+    height: 75px;
+    border: 4px solid black;
+    font-family: Cursive;
+}
+
+header .logo{
+    font-size: 22px;
+    font-family: Cursive;
+    color: #000000;
+    text-decoration: none;
+}
+
+header nav ul li {
+    position: relative;
+    float: left;
+    list-style-type: none;
+}
+
+header nav ul li a{
+    padding: 20px;
+    color: #000000;
+    font-size: 16px;
+    font-family: cursive;
+    display: block;
+    text-decoration: none;
+}
+
+header nav ul li a:hover{
+    background: #000000;
+    color: #ffffff;
+
+}
+
+nav ul li ul{
+    position: absolute;
+    left: 0;
+    width: 180px;
+    background: #ffffff;
+    display: none;
+    background: rgba(0, 0, 0, 0);
+}
+
+nav ul li ul li{
+    width: 175px;
+    background: rgb(255, 255, 255);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+nav ul li:hover > ul {
+    display: initial;
+}
+
+
+.container {
+    margin-top: 10px;
+}
+.product {
+    margin-bottom: 10px;
+    margin-top: 10px;
+    text-decoration: none;
+    color: #000000;
+}
+
+.image {
+    margin-bottom: 10px;
+}
+
+.image img {
+    height: 300px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.info h3 {
+    font-size: 22px;
+}
+
+.rating {
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style-type: none;
+}
+
+.rating li {
+    display: inline-block;
+    color: #ffc107;
+}
+
+.info-price {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center
+}
+
+.add-to-cart {
+    border: none
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.price {
+    font-size: 18px;
+}
+
+.product-card {
+    height: 400px;
+    width: auto;
+    margin-top: 10px;
+    border: 2px solid #000000;
+    border-radius: 8px;
+}
+
+.buy-button {
+    width: 250px;
+    height: 75px;
+    margin: 20px 0px 0px 35%;
+    font-family: Cursive;
+    border-radius: 8px;
+}
+
+.name-product {
+    width: 100%;
+    margin-left: 50px;
+    font-family: Cursive;
+    font-size: 30px;
+}
+
+.price-in-card {
+    font-family: Cursive;
+    font-size: 22px;
+    margin-left: 50px;
+}
+
+.info-about-product {
+    float: left;
+    width: 50%;
+    height: 100%;
+}
+
+.raiting-in-card {
+    font-size: 22px;
+    color: #ffc107;
+    margin-left: 50px;
+    font-family: Cursive;
+}

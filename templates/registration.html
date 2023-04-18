@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form style="margin-left: 40%; margin-right: 40%; margin-top: 10px;" action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p class="basic_font">
+        {{ form.email.label }}<br>
+        {{ form.email(class="form-control for_forms", type="email") }}<br>
+        {% for error in form.email.errors %}
+    <div class="alert alert-danger errors" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+    <p class="basic_font">
+        {{ form.password.label }}<br>
+        {{ form.password(class="form-control for_forms", type="password") }}<br>
+        {% for error in form.password.errors %}
+    <div class="alert alert-danger errors" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+    <p class="basic_font">
+        {{ form.repeat_password.label }}<br>
+        {{ form.repeat_password(class="form-control for_forms", type="password") }}<br>
+        {% for error in form.repeat_password.errors %}
+    <div class="alert alert-danger errors" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    <p class="basic_font">
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control for_forms") }}<br>
+        {% for error in form.name.errors %}
+    <div class="alert alert-danger errors" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+     <p class="basic_font">
+        {{ form.surname.label }}<br>
+        {{ form.surname(class="form-control for_forms") }}<br>
+        {% for error in form.surname.errors %}
+    <div class="alert alert-danger errors" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    <p>{{ form.submit(type="submit", class="basic_font") }}</p>
+    <p>{{ message }}</p>
+</form>
+{% endblock %}
