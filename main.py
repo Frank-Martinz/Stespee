@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, login_user, current_user, logout_user
 from forms.loginform import LoginForm
 from forms.registform import RegistrationForm
+from forms.changingform import ChangingForm_login, ChangingForm_surname, ChangingForm_name, ChangingForm_password
 from data import db_session
 from data.users import User
 from data.products import Product
@@ -32,6 +33,7 @@ def first_page():
     items = list()
     for prod in products:
         items.append([prod, url_for('static', filename=prod.image)])
+    db_sess.close()
     return render_template('catalog.html', items=items)
 
 
@@ -42,6 +44,7 @@ def catalog_by_category(category):
     items = list()
     for prod in products:
         items.append([prod, url_for('static', filename=prod.image)])
+    db_sess.close()
     return render_template('catalog.html', items=items)
 
 
@@ -53,7 +56,9 @@ def login():
         user = db_sess.query(User).filter(User.login == form.login.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
+            db_sess.close()
             return redirect("/")
+        db_sess.close()
         return render_template('login.html', form=form, message='Неверно введён логин или пароль')
     return render_template('login.html', form=form)
 
@@ -76,6 +81,7 @@ def registration():
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
+        db_sess.close()
         return redirect('/')
     return render_template('registration.html', form=form)
 
@@ -103,16 +109,9 @@ def show_the_product(id):
         if 5 - int(product.raiting) > 0:
             for i in range(5 - int(product.raiting)):
                 raiting.append('star-outline')
-
+    db_sess.close()
     return render_template('product.html', item=product, image=url_for('static', filename=product.image),
                            raiting=raiting)
-
-
-@app.route('/account/<int:id>')
-def show_account():
-    db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.id == id).first()
-    return render_template('account.html', item=user)
 
 
 @app.route('/logout')
@@ -136,9 +135,18 @@ def cart():
             items = []
             for item in products:
                 items.append([current_user.id, prods[item.id], item, url_for('static', filename=item.image)])
+            db_sess.close()
             return render_template('cart.html', items=items, show_smth=True, amount=amount)
     else:
         return redirect('/login')
+
+
+@app.route('/account')
+def account():
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(current_user.id == User.id).first()
+    db_sess.close()
+    return render_template('account.html', item=user)
 
 
 @app.route('/add/<int:user_id>/<int:product_id>/<int:tp>', methods=['POST'])
@@ -146,14 +154,18 @@ def add(user_id, product_id, tp):
     db_sess = db_session.create_session()
     user_cart = db_sess.query(Cart).filter(Cart.user_id == user_id).first()
     if user_cart.products == '{}':
-        prods = {product_id: 1}
+        prods = {}
     else:
         prods = create_dict_of_prod(user_cart.products)
+    if not (product_id in prods):
+        prods[product_id] = 1
+    else:
         prods[product_id] += 1
     amount = count_whole_cost(prods)
     user_cart.products = str(prods)
     user_cart.amount = int(amount)
     db_sess.commit()
+    db_sess.close()
     if tp == 1:
         return redirect('/cart')
     return redirect(f'/product/{product_id}')
@@ -171,7 +183,38 @@ def minus(user_id, product_id):
     user_cart.products = str(prods)
     user_cart.amount = int(amount)
     db_sess.commit()
+    db_sess.close()
     return redirect('/cart')
+
+
+@app.route('/change_info/<tp>', methods=['GET', 'POST'])
+def change_info(tp):
+    if tp == 'login':
+        form = ChangingForm_login()
+    elif tp == 'password':
+        form = ChangingForm_password()
+    elif tp == 'name':
+        form = ChangingForm_name()
+    elif tp == 'surname':
+        form = ChangingForm_surname()
+    else:
+        return redirect('/account')
+
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.id == current_user.id).first()
+        if tp == 'login':
+            user.login = form.login.data
+        elif tp == 'password':
+            user.password = form.password.data
+        elif tp == 'name':
+            user.name = form.name.data
+        elif tp == 'surname':
+            user.surname = form.surname.data
+        db_sess.commit()
+        db_sess.close()
+        return redirect('/account')
+    return render_template('change_info.html', form=form, tp=tp)
 
 
 def create_dict_of_prod(products: str):
@@ -195,6 +238,7 @@ def count_whole_cost(prods_in_cart):
     for key in prods_in_cart:
         result = db_sess.query(Product).filter(Product.id == key).first()
         amount += result.cost * prods_in_cart[key]
+    db_sess.close()
     return amount
 
 
