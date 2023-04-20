@@ -37,9 +37,6 @@
         </div>
     </div>
     {% endfor %}
-    {% else %}
-    <p>Ваша корзина пуста</p>
-    {% endif %}
     <div>
         <p style="margin-left: 10px; font-size: 25px;">Общая стоимость: {{ amount }} ₽</p>
     </div>
@@ -47,5 +44,16 @@
         <input type="button" placeholder="Перейти к оформлению" value="Перейти к оформлению"
                style="background: #30C949; border-radius:12px; border: none; width: 225px; height: 50px; margin-right: 265px; position: fixed; margin-left: 10px;">
     </form>
+    {% else %}
+    <p>Ваша корзина пуста</p>
+    <div>
+        <p style="margin-left: 10px; font-size: 25px;">Общая стоимость: 0 ₽</p>
+    </div>
+    <form action="#">
+        <input type="button" placeholder="Перейти к оформлению" value="Перейти к оформлению"
+               style="background: #30C949; border-radius:12px; border: none; width: 225px; height: 50px; margin-right: 265px; position: fixed; margin-left: 10px;"
+               disabled>
+    </form>
+    {% endif %}
 </div>
 {% endblock %}

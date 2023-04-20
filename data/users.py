@@ -12,8 +12,10 @@ class User(SqlAlchemyBase, UserMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     surname = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    len_of_password = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
 
     def set_password(self, password):
+        self.len_of_password = len(password)
         self.hashed_password = generate_password_hash(password)
 
     def check_password(self, password):

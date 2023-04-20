@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, login_user, current_user, logout_user
+from werkzeug.security import generate_password_hash
 from forms.loginform import LoginForm
 from forms.registform import RegistrationForm
 from forms.changingform import ChangingForm_login, ChangingForm_surname, ChangingForm_name, ChangingForm_password
@@ -78,8 +79,15 @@ def registration():
             name=form.name.data,
             surname=form.surname.data
         )
+
         user.set_password(form.password.data)
         db_sess.add(user)
+        db_sess.commit()
+        cart = Cart(
+            user_id=user.id,
+            amount=0,
+        )
+        db_sess.add(cart)
         db_sess.commit()
         db_sess.close()
         return redirect('/')
@@ -125,6 +133,7 @@ def cart():
     if current_user.is_authenticated:
         db_sess = db_session.create_session()
         user_cart = db_sess.query(Cart).filter(Cart.user_id == current_user.id).first()
+        print(user_cart)
         if user_cart.products == '{}':
             return render_template('cart.html', show_smth=False)
         else:
@@ -146,7 +155,7 @@ def account():
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(current_user.id == User.id).first()
     db_sess.close()
-    return render_template('account.html', item=user)
+    return render_template('account.html', item=user, password=str('●' * user.len_of_password))
 
 
 @app.route('/add/<int:user_id>/<int:product_id>/<int:tp>', methods=['POST'])
@@ -206,7 +215,11 @@ def change_info(tp):
         if tp == 'login':
             user.login = form.login.data
         elif tp == 'password':
-            user.password = form.password.data
+            if form.password.data == form.repeat_password.data:
+                user.hashed_password = generate_password_hash(form.password.data)
+                user.len_of_password = len(form.password.data)
+            else:
+                return render_template('change_info.html', form=form, tp=tp, message='Пароли не совпадают')
         elif tp == 'name':
             user.name = form.name.data
         elif tp == 'surname':

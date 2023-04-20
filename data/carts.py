@@ -8,5 +8,5 @@ class Cart(SqlAlchemyBase, UserMixin):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     user_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    products = sqlalchemy.Column(sqlalchemy.VARCHAR, nullable=True, default='{}')
+    products = sqlalchemy.Column(sqlalchemy.VARCHAR, nullable=False, default='{}')
     amount = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
