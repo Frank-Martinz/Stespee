@@ -4,10 +4,16 @@ from werkzeug.security import generate_password_hash
 from forms.loginform import LoginForm
 from forms.registform import RegistrationForm
 from forms.changingform import ChangingForm_login, ChangingForm_surname, ChangingForm_name, ChangingForm_password
+from forms.orderform import OrderForm
 from data import db_session
 from data.users import User
 from data.products import Product
 from data.carts import Cart
+from data.orders import Order
+import re
+import sys
+import requests
+from pprint import pprint
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'pfybvfqntcmcgjhnfvvfkmxbrbbltdjxrb'
@@ -133,11 +139,9 @@ def cart():
     if current_user.is_authenticated:
         db_sess = db_session.create_session()
         user_cart = db_sess.query(Cart).filter(Cart.user_id == current_user.id).first()
-        print(user_cart)
         if user_cart.products == '{}':
             return render_template('cart.html', show_smth=False)
         else:
-            print(user_cart.products)
             prods = create_dict_of_prod(user_cart.products)
             products = db_sess.query(Product).filter(Product.id.in_(list(prods.keys()))).all()
             amount = count_whole_cost(prods)
@@ -156,6 +160,47 @@ def account():
     user = db_sess.query(User).filter(current_user.id == User.id).first()
     db_sess.close()
     return render_template('account.html', item=user, password=str('●' * user.len_of_password))
+
+
+@app.route('/create_order', methods=['GET', 'POST'])
+def create_orders():
+    message = ''
+    db_sess = db_session.create_session()
+    user_cart = db_sess.query(Cart).filter(Cart.user_id == current_user.id).first()
+    if user_cart.products == '{}':
+        return redirect('/cart')
+    form = OrderForm()
+    if form.validate_on_submit():
+        correct_address = is_correct_address(form.address.data)
+        correct_phone_number = is_correct_mobile_phone_number_ru(form.phone_number.data)
+        if correct_phone_number and correct_address:
+            add_new_order(current_user.id, form)
+            db_sess.close()
+            return redirect('/catalog')
+        else:
+            if not correct_address:
+                message = 'Некорректный адрес'
+            else:
+                message = 'Некорректный номер телефона'
+    user = db_sess.query(User).filter(User.id == current_user.id).first()
+    db_sess.close()
+    return render_template('create_order.html', form=form, item=user, message=message)
+
+
+@app.route('/show_orders')
+def show_orders():
+    db_sess = db_session.create_session()
+    orders = db_sess.query(Order).filter(Order.user_id == current_user.id).all()
+    db_sess.close()
+    items = []
+    if len(orders) > 0:
+        show_smth = True
+        for order in reversed(orders):
+            order_list = create_list_of_products(order.products)
+            items.append([order, order_list])
+    else:
+        show_smth = False
+    return render_template('show_orders.html', items=items, show_smth=show_smth)
 
 
 @app.route('/add/<int:user_id>/<int:product_id>/<int:tp>', methods=['POST'])
@@ -230,6 +275,28 @@ def change_info(tp):
     return render_template('change_info.html', form=form, tp=tp)
 
 
+def add_new_order(user_id: int, form):
+    db_sess = db_session.create_session()
+    user_cart = db_sess.query(Cart).filter(Cart.user_id == user_id).first()
+    products = create_dict_of_prod(user_cart.products)
+    text_products = ''
+    for index in products:
+        product = db_sess.query(Product).filter(Product.id == index).first()
+        text_products += f'{product.name} x {products[index]}|'
+    order = Order(
+        user_id=user_cart.user_id,
+        products=text_products,
+        address=form.address.data,
+        status='Создан',
+        phone_number=form.phone_number.data,
+        amount=user_cart.amount
+    )
+    db_sess.add(order)
+    user_cart.products = '{}'
+    db_sess.commit()
+    db_sess.close()
+
+
 def create_dict_of_prod(products: str):
     products = products[1:-1]
     if ', ' in products:
@@ -254,6 +321,46 @@ def count_whole_cost(prods_in_cart):
     db_sess.close()
     return amount
 
+
+def is_correct_mobile_phone_number_ru(phone_number):
+    remainder = ''
+    if phone_number.startswith('+7'):
+        remainder = phone_number[2:]
+    elif phone_number.startswith('8'):
+        remainder = phone_number[1:]
+    else:
+        return False
+
+    remainder = re.sub(r'[ -]', '', remainder)
+
+    if re.match(r'^\(\d{3}\)', remainder):
+        remainder = re.sub(r'\(', '', remainder, 1)
+        remainder = re.sub(r'\)', '', remainder, 1)
+
+    return bool(re.match(r'^\d{10}$', remainder))
+
+
+def is_correct_address(address):
+    server = 'https://search-maps.yandex.ru/v1/'
+    params = {
+        'apikey': 'dda3ddba-c9ea-4ead-9010-f43fbc15c6e3',
+        'text': address,
+        'lang': 'ru'
+    }
+    data = requests.get(url=server, params=params).json()
+    if len(data['features']) == 0:
+        return False
+    return True
+
+
+def create_list_of_products(products: str):
+    if '|' in products:
+        prods = products.split('|')
+        return prods
+    return [products]
+
+
+sys.modules['inspect'] = None
 
 if __name__ == '__main__':
     main()

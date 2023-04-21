@@ -8,6 +8,10 @@
     opacity: 1;
 }
 
+* {
+    font-family: Cursive;
+}
+
 .lower_field{
     position: relative;
     top: 75px;
