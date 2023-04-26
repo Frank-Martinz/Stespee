@@ -15,11 +15,9 @@
                     <h3>{{ item[0].name }}</h3>
 
                     <ul class="rating">
-                        <li><ion-icon name="star"></ion-icon></li>
-                        <li><ion-icon name="star"></ion-icon></li>
-                        <li><ion-icon name="star"></ion-icon></li>
-                        <li><ion-icon name="star"></ion-icon></li>
-                        <li><ion-icon name="star"></ion-icon></li>
+                        {% for star in item[-1] %}
+                        <li><ion-icon name="{{ star }}"></ion-icon></li>
+                        {% endfor %}
                     </ul>
                     <div class="info-price">
                         <span class="price">{{item[0].cost}}₽</span>

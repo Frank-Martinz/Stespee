@@ -10,15 +10,16 @@ from data.users import User
 from data.products import Product
 from data.carts import Cart
 from data.orders import Order
+from data.feedbacks import Feedback
 import re
 import sys
 import requests
 from pprint import pprint
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'pfybvfqntcmcgjhnfvvfkmxbrbbltdjxrb'
+application = Flask(__name__)
+application.config['SECRET_KEY'] = 'pfybvfqntcmcgjhnfvvfkmxbrbbltdjxrb'
 login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager.init_app(application)
 
 
 @login_manager.user_loader
@@ -29,33 +30,33 @@ def load_user(user_id):
 
 def main():
     db_session.global_init("db/all_info.db")
-    app.run()
+    application.run()
 
 
-@app.route('/')
-@app.route('/catalog')
+@application.route('/')
+@application.route('/catalog')
 def first_page():
     db_sess = db_session.create_session()
     products = db_sess.query(Product).all()
     items = list()
     for prod in products:
-        items.append([prod, url_for('static', filename=prod.image)])
+        items.append([prod, url_for('static', filename=prod.image), count_stars(prod)])
     db_sess.close()
     return render_template('catalog.html', items=items)
 
 
-@app.route('/catalog/<category>')
+@application.route('/catalog/<category>')
 def catalog_by_category(category):
     db_sess = db_session.create_session()
     products = db_sess.query(Product).filter(Product.category == category).all()
     items = list()
     for prod in products:
-        items.append([prod, url_for('static', filename=prod.image)])
+        items.append([prod, url_for('static', filename=prod.image), count_stars(prod)])
     db_sess.close()
     return render_template('catalog.html', items=items)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -70,7 +71,7 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/registration', methods=['GET', 'POST'])
+@application.route('/registration', methods=['GET', 'POST'])
 def registration():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -100,7 +101,7 @@ def registration():
     return render_template('registration.html', form=form)
 
 
-@app.route('/product/<int:id>', methods=['GET', 'POST'])
+@application.route('/product/<int:id>', methods=['GET', 'POST'])
 def show_the_product(id):
     if request.method == 'GET':
         db_sess = db_session.create_session()
@@ -108,33 +109,22 @@ def show_the_product(id):
     else:
         db_sess = db_session.create_session()
         product = db_sess.query(Product).filter(Product.id == id).first()
-
-    raiting = []
-    if int(product.raiting) != product.raiting:
-        for i in range(int(product.raiting)):
-            raiting.append('star')
-        raiting.append('star-half')
-        if 5 - int(product.raiting) > 1:
-            for i in range(5 - int(product.raiting)):
-                raiting.append('star-outline')
-    else:
-        for i in range(int(product.raiting)):
-            raiting.append('star')
-        if 5 - int(product.raiting) > 0:
-            for i in range(5 - int(product.raiting)):
-                raiting.append('star-outline')
+    feedback_amount = product.five_stars + product.four_stars + product.three_stars \
+                      + product.two_stars + product.one_star
+    feedbacks = db_sess.query(Feedback).filter(Feedback.product_id == id).all()
+    raiting = count_stars(product)
     db_sess.close()
     return render_template('product.html', item=product, image=url_for('static', filename=product.image),
-                           raiting=raiting)
+                           raiting=raiting, feedback_amount=feedback_amount, feedbacks=reversed(feedbacks))
 
 
-@app.route('/logout')
+@application.route('/logout')
 def logout():
     logout_user()
     return redirect('/')
 
 
-@app.route('/cart')
+@application.route('/cart')
 def cart():
     if current_user.is_authenticated:
         db_sess = db_session.create_session()
@@ -154,16 +144,20 @@ def cart():
         return redirect('/login')
 
 
-@app.route('/account')
+@application.route('/account')
 def account():
+    if not current_user.is_authenticated:
+        return redirect('/login')
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(current_user.id == User.id).first()
     db_sess.close()
     return render_template('account.html', item=user, password=str('●' * user.len_of_password))
 
 
-@app.route('/create_order', methods=['GET', 'POST'])
+@application.route('/create_order', methods=['GET', 'POST'])
 def create_orders():
+    if not current_user.is_authenticated:
+        return redirect('/login')
     message = ''
     db_sess = db_session.create_session()
     user_cart = db_sess.query(Cart).filter(Cart.user_id == current_user.id).first()
@@ -187,8 +181,10 @@ def create_orders():
     return render_template('create_order.html', form=form, item=user, message=message)
 
 
-@app.route('/show_orders')
+@application.route('/show_orders')
 def show_orders():
+    if not current_user.is_authenticated:
+        return redirect('/login')
     db_sess = db_session.create_session()
     orders = db_sess.query(Order).filter(Order.user_id == current_user.id).all()
     db_sess.close()
@@ -203,7 +199,34 @@ def show_orders():
     return render_template('show_orders.html', items=items, show_smth=show_smth)
 
 
-@app.route('/add/<int:user_id>/<int:product_id>/<int:tp>', methods=['POST'])
+@application.route('/add_feedback/<int:prod_id>', methods=['GET', 'POST'])
+def add_feedback(prod_id):
+    if not current_user.is_authenticated:
+        return redirect('/login')
+    db_sess = db_session.create_session()
+    if request.method == 'POST':
+        if request.form['feedback'] == '':
+            return 'ERROR'
+        mark = int(request.form['mark'])
+        feedback = Feedback(
+            product_id=prod_id,
+            feedback_text=request.form['feedback'],
+            mark=mark,
+            user_name=f'{current_user.name} {current_user.surname}'
+        )
+        db_sess.add(feedback)
+        adjust_raiting(prod_id, mark, db_sess)
+        db_sess.commit()
+        db_sess.close()
+        return redirect(f'/product/{prod_id}')
+    product = db_sess.query(Product).filter(Product.id == prod_id).first()
+    item = [product, url_for('static', filename=product.image)]
+    raiting = count_stars(product)
+    db_sess.close()
+    return render_template('feedbackadding.html', item=item, raiting=raiting)
+
+
+@application.route('/add/<int:user_id>/<int:product_id>/<int:tp>', methods=['POST'])
 def add(user_id, product_id, tp):
     db_sess = db_session.create_session()
     user_cart = db_sess.query(Cart).filter(Cart.user_id == user_id).first()
@@ -225,7 +248,7 @@ def add(user_id, product_id, tp):
     return redirect(f'/product/{product_id}')
 
 
-@app.route('/minus/<int:user_id>/<int:product_id>', methods=['POST'])
+@application.route('/minus/<int:user_id>/<int:product_id>', methods=['POST'])
 def minus(user_id, product_id):
     db_sess = db_session.create_session()
     user_cart = db_sess.query(Cart).filter(Cart.user_id == user_id).first()
@@ -241,7 +264,7 @@ def minus(user_id, product_id):
     return redirect('/cart')
 
 
-@app.route('/change_info/<tp>', methods=['GET', 'POST'])
+@application.route('/change_info/<tp>', methods=['GET', 'POST'])
 def change_info(tp):
     if tp == 'login':
         form = ChangingForm_login()
@@ -358,6 +381,44 @@ def create_list_of_products(products: str):
         prods = products.split('|')
         return prods
     return [products]
+
+
+def count_stars(product):
+    raiting = []
+    if int(product.raiting) != product.raiting:
+        for i in range(int(product.raiting)):
+            raiting.append('star')
+        raiting.append('star-half')
+        if 5 - int(product.raiting) > 1:
+            for i in range(5 - int(product.raiting) - 1):
+                raiting.append('star-outline')
+    else:
+        for i in range(int(product.raiting)):
+            raiting.append('star')
+        if 5 - int(product.raiting) > 0:
+            for i in range(5 - int(product.raiting)):
+                raiting.append('star-outline')
+    return raiting
+
+
+def adjust_raiting(prod_id, mark, db_sess):
+    product = db_sess.query(Product).filter(Product.id == prod_id).first()
+    if mark == 1:
+        product.one_star += 1
+    elif mark == 2:
+        product.two_stars += 1
+    elif mark == 3:
+        product.three_stars += 1
+    elif mark == 4:
+        product.four_stars += 1
+    elif mark == 5:
+        product.five_stars += 1
+
+    all_marks = product.one_star + product.two_stars + product.three_stars + product.four_stars + product.five_stars
+    pre_raiting = product.one_star + (product.two_stars * 2) + (product.three_stars * 3) + \
+                  (product.four_stars * 4) + (product.five_stars * 5)
+    product.raiting = pre_raiting / all_marks
+    db_sess.commit()
 
 
 sys.modules['inspect'] = None

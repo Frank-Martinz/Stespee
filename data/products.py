@@ -13,3 +13,8 @@ class Product(SqlAlchemyBase, UserMixin):
     info = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     category = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     raiting = sqlalchemy.Column(sqlalchemy.Double, nullable=False)
+    five_stars = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    four_stars = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    three_stars = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    two_stars = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    one_star = sqlalchemy.Column(sqlalchemy.Integer, default=0)
