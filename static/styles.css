@@ -97,7 +97,7 @@ nav ul li:hover > ul {
 
 .image img {
     height: 300px;
-    width: 100%;
+    width: auto;
     object-fit: cover;
     border-radius: 8px;
 }

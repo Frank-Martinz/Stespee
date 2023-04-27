@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
+<title>Добавление отзыва</title>
+<link rel="shortcut icon" href="static/icon.png" type="image/x-icon">
 <div style="width: 100%; margin-bottom: 50px;">
     <div style="width: 50%; margin-left: 25%; margin: right: 25%; border: 2px solid #000000; border-radius: 4px; margin-top: 50px">
         <div style="display: inline-block">
@@ -26,6 +28,7 @@
             </select>
             <button type="submit" style="margin-left: 80%; margin-bottom: 15px;">Подтвердить</button>
         </form>
+        <p>{{ message }}</p>
     </div>
 </div>
 {% for i in range(5) %}

@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
+<title>Смена данных</title>
+<link rel="shortcut icon" href="static/icon.png" type="image/x-icon">
 <div style="width: 100%">
     <div style="width: 50%; margin-left: 25%; margin: right: 25%; border: 2px solid #000000; border-radius: 4px; margin-top: 50px;">
-
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
             {% if tp == "login" %}

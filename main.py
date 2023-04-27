@@ -14,7 +14,6 @@ from data.feedbacks import Feedback
 import re
 import sys
 import requests
-from pprint import pprint
 
 application = Flask(__name__)
 application.config['SECRET_KEY'] = 'pfybvfqntcmcgjhnfvvfkmxbrbbltdjxrb'
@@ -170,7 +169,7 @@ def create_orders():
         if correct_phone_number and correct_address:
             add_new_order(current_user.id, form)
             db_sess.close()
-            return redirect('/catalog')
+            return redirect('/payment')
         else:
             if not correct_address:
                 message = 'Некорректный адрес'
@@ -179,6 +178,17 @@ def create_orders():
     user = db_sess.query(User).filter(User.id == current_user.id).first()
     db_sess.close()
     return render_template('create_order.html', form=form, item=user, message=message)
+
+
+@application.route('/payment/', methods=['GET', 'POST'])
+def payment():
+    if not current_user.is_authenticated:
+        return redirect('/login')
+    if request.method == 'POST':
+        return redirect('/show_orders')
+    db_sess = db_session.create_session()
+    order = db_sess.query(Order).filter(Order.user_id == current_user.id).all()
+    return render_template('payment.html', order=order[-1])
 
 
 @application.route('/show_orders')
@@ -206,7 +216,12 @@ def add_feedback(prod_id):
     db_sess = db_session.create_session()
     if request.method == 'POST':
         if request.form['feedback'] == '':
-            return 'ERROR'
+            product = db_sess.query(Product).filter(Product.id == prod_id).first()
+            item = [product, url_for('static', filename=product.image)]
+            raiting = count_stars(product)
+            db_sess.close()
+            return render_template('feedbackadding.html', item=item, raiting=raiting,
+                                   message='Напишите пару слов о товаре')
         mark = int(request.form['mark'])
         feedback = Feedback(
             product_id=prod_id,
@@ -266,6 +281,8 @@ def minus(user_id, product_id):
 
 @application.route('/change_info/<tp>', methods=['GET', 'POST'])
 def change_info(tp):
+    if not current_user.is_authenticated:
+        return redirect('/login')
     if tp == 'login':
         form = ChangingForm_login()
     elif tp == 'password':
@@ -310,7 +327,7 @@ def add_new_order(user_id: int, form):
         user_id=user_cart.user_id,
         products=text_products,
         address=form.address.data,
-        status='Создан',
+        status='Ожидает оплаты',
         phone_number=form.phone_number.data,
         amount=user_cart.amount
     )
