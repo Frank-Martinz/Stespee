@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<title>Создание заказа</title>
+<link rel="shortcut icon" href="static/icon.png" type="image/x-icon">
+<div>
+    <div style="width: 100%">
+        <div style="width: 50%; margin-left: 25%; margin: right: 25%; border: 2px solid #000000; border-radius: 4px; margin-top: 50px;">
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+                <p>
+                    {{ form.name.label }}<br>
+                    {{ form.name(class="form-control for_forms", value=item.name) }}<br>
+                    {% for error in form.name.errors %}
+                <div class="alert alert-danger errors" role="alert">
+                    {{ error }}
+                </div>
+                {% endfor %}
+                <p>
+                    {{ form.surname.label }}<br>
+                    {{ form.surname(class="form-control for_forms", value=item.surname) }}<br>
+                    {% for error in form.surname.errors %}
+                <div class="alert alert-danger errors" role="alert">
+                    {{ error }}
+                </div>
+                {% endfor %}
+                <p>
+                    {{ form.phone_number.label }}<br>
+                    {{ form.phone_number(class="form-control for_forms") }}<br>
+                    {% for error in form.phone_number.errors %}
+                <div class="alert alert-danger errors" role="alert">
+                    {{ error }}
+                </div>
+                {% endfor %}
+                </p>
+                <p>
+                    {{ form.address.label }}<br>
+                    {{ form.address(class="form-control for_forms") }}<br>
+                    {% for error in form.address.errors %}
+                <div class="alert alert-danger errors" role="alert">
+                    {{ error }}
+                </div>
+                {% endfor %}
+                </p>
+                <p>{{ form.submit(type="submit", class="*") }}</p>
+                <p>{{ message }}</p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

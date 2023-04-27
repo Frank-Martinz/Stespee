@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<title>Оплата</title>
+<link rel="shortcut icon" href="static/icon.png" type="image/x-icon">
+<div>
+    <div style="width: 100%">
+        <div style="width: 50%; margin-left: 25%; margin: right: 25%; border: 2px solid #000000; border-radius: 4px; margin-top: 50px;">
+            <h5>На данный момент оплата возможна только переводом</h5>
+            <br>
+            <h6>Чтобы оплатить ваши покупки, переведите на номер телефона: </h6>
+            <h6>+7 (914) 727-34-10 и укажите номер вашего заказа</h6>
+            <br>
+            <h6>Сумма вашего заказа: {{ order.amount }} ₽</h6>
+            <br>
+            <h6>Номер заказа: {{ order.id }}</h6>
+            <br>
+            <form action="/payment" method="POST">
+                <button type="submit">Вернуться к заказам</button>
+            </form>
+            <br>
+            <br>
+            <br>
+            <br>
+            <p style="font-size: 10px;">В течении 48 часов ваш заказ будет обработан и данные о нём будут обновлены,
+                если вы перевели необходимую сумму. Если вы перевели недостаточную сумму или сумму больше вашего заказа,
+                средства вернут, а заказ отменят. Если вы решили отказаться от покупки, то ничего не переводите</p>
+            <p style="font-size: 10px;">Команда магазина Stespee приносит свои извинения за доставленные неудобства</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

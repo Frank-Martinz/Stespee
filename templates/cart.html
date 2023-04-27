@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<title>Корзина</title>
+<link rel="shortcut icon" href="static/icon.png" type="image/x-icon">
+<div>
+    {% if show_smth %}
+    {% for item in items %}
+    <div style="width: 80%; border: 2px solid #000000; margin: 10px 0px 0px 10px; border-radius: 4px;">
+        <div style="display: inline-block">
+            <img src="{{ item[-1] }}" alt="Error" style="width: 175px; height: 150px">
+        </div>
+        <div style="display: inline-block; width: 45%;">
+            <div style="height: 75px; text-align: justify;">
+                {{ item[2].name }}
+            </div>
+        </div>
+        <div style="display: inline-block; float: right; width: 20%; height: 75px; text-align: justify; margin-top: 20px;">
+            <div style="width: 33%; display: inline-block">
+                <form action="/add/{{ item[0] }}/{{ item[2].id }}/1" method="post"
+                      style="">
+                    <button type="submit" style="width: 45px; height: 45px; border-radius: 40px; margin-left: 5px;">
+                        <ion-icon name="add-outline"></ion-icon>
+                    </button>
+                </form>
+            </div>
+            <div style="width: 30%; display: inline-block; text-align: center">
+                <p style="font-size: 22px;">{{ item[1] }}</p>
+            </div>
+            <div style="width: 33%; display: inline-block; float: right">
+                <form action="/minus/{{ item[0] }}/{{ item[2].id }}" method="post"
+                      style="display: inline-block; float: right">
+                    <button type="submit" style="width: 45px; height: 45px; border-radius: 40px; margin-right: 10px;">
+                        <ion-icon name="remove-outline"></ion-icon>
+                    </button>
+                </form>
+            </div>
+            <p style="margin-top: 20%">{{ item[2].cost * item[1]}} ₽</p>
+        </div>
+    </div>
+    {% endfor %}
+    <div>
+        <p style="margin-left: 10px; font-size: 25px;">Общая стоимость: {{ amount }} ₽</p>
+    </div>
+    <form action="/create_order">
+        <input type="submit" placeholder="Перейти к оформлению" value="Перейти к оформлению"
+               style="background: #30C949; border-radius:12px; border: none; width: 225px; height: 50px; margin-right: 265px; position: fixed; margin-left: 10px;" >
+    </form>
+    {% else %}
+    <h1>Ваша корзина пуста</h1>
+    <p>Чтобы купить товары, выберите нужные и добавьте в корзину</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+.basic_font {
+    font-family: Courier New, monospace;
+    font-size: 22px;
+}
+.for_forms{
+    width: 325px;
+    height: 25px;
+    font-size: 22px;
+}
+.for_button{
+    width: 100px;
+}
+
+.errors{
+    font-family: Courier New, monospace;
+    font-size: 17px;
+    color: #ff0000;
+}
+

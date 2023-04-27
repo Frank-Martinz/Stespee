@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<title>Смена данных</title>
+<link rel="shortcut icon" href="static/icon.png" type="image/x-icon">
+<div style="width: 100%">
+    <div style="width: 50%; margin-left: 25%; margin: right: 25%; border: 2px solid #000000; border-radius: 4px; margin-top: 50px;">
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            {% if tp == "login" %}
+            <p style="font-family: Cursive;">
+                {{ form.login.label }}<br>
+                {{ form.login(class="form-control for_forms") }}<br>
+                {% for error in form.login.errors %}
+            <div class="alert alert-danger errors" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            </p>
+            {% elif tp == "password"%}
+            <p style="font-family: Cursive;">
+                {{ form.password.label }}<br>
+                {{ form.password(class="form-control for_forms", type="password") }}<br>
+                {% for error in form.password.errors %}
+            <div class="alert alert-danger errors" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            <p class="font-family: Cursive;">
+                {{ form.repeat_password.label }}<br>
+                {{ form.repeat_password(class="form-control for_forms", type="password") }}<br>
+                {% for error in form.repeat_password.errors %}
+            <div class="alert alert-danger errors" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            </p>
+            {% elif tp == "name"%}
+            <p style="font-family: Cursive;">
+                {{ form.name.label }}<br>
+                {{ form.name(class="form-control for_forms") }}<br>
+                {% for error in form.name.errors %}
+            <div class="alert alert-danger errors" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            </p>
+            {% elif tp == "surname"%}
+            <p style="font-family: Cursive;">
+                {{ form.surname.label }}<br>
+                {{ form.surname(class="form-control for_forms") }}<br>
+                {% for error in form.surname.errors %}
+            <div class="alert alert-danger errors" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            </p>
+            {% endif %}
+
+            <p>{{ form.submit(type="submit", class="*") }}</p>
+            <p>{{ message }}</p>
+        </form>
+    </div>
+</div>
+{% endblock %}

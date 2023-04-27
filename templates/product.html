@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<title>{{ item.name }}</title>
+<link rel="shortcut icon" href="static/icon.png" type="image/x-icon">
+<div style="height: 600px">
+    <div>
+        <div class="name-product">
+            <p>{{ item.name }}</p>
+        </div>
+        <div class="raiting-in-card">
+            {% for star in raiting %}
+            <ion-icon name="{{ star }}"></ion-icon>
+            {% endfor %}
+            <br>
+            Отзывов: {{ feedback_amount }}
+        </div>
+        <div style="float: left; width: 50%;">
+            <p style="text-align: center">
+                <img src="{{ image }}" alt="Тут должна была быть картинка" class="product-card">
+            </p>
+        </div>
+        <div class="info-about-product">
+            <div>
+                <p class="price-in-card" style="">{{ item.cost }}₽</p>
+            </div>
+            {% if current_user.is_authenticated %}
+            <form method="POST" action="/add/{{ current_user.id }}/{{ item.id }}/2">
+                <button type="submit" class="buy-button">Купить</button>
+            </form>
+            {% else %}
+            <form action="/login">
+                <button type="submit" class="buy-button">Купить</button>
+            </form>
+            {% endif %}
+            <div>
+                <p style="margin-top: 20px; margin-left: 40px; font-size: 18px; margin-left: 50px;">{{ item.info }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="width: 90%">
+    <form action="/add_feedback/{{ item.id }}" style="margin-left: 30px;">
+        <button type="submit">Написать отзыв</button>
+    </form>
+    {% for feedback in feedbacks %}
+    <br>
+    <div style="margin-left: 30px;">
+        <div style="display: inline-block; width: 70%; border: 2px solid #000000">
+            <p>{{ feedback.user_name }}</p>
+            <p>Оценка: {{ feedback.mark }}</p>
+            <p>Отзыв: {{ feedback.feedback_text }}</p>
+        </div>
+    </div>
+    <br>
+    {% endfor %}
+</div>
+{% endblock%}

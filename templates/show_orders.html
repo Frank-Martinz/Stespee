@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<title>Заказы</title>
+<link rel="shortcut icon" href="static/icon.png" type="image/x-icon">
+<div style="width: 100%;">
+    {% if show_smth %}
+    <div style="width: 50%; margin-left: 25%; margin: right: 25%; border: 2px solid #000000; border-radius: 4px; margin-top: 50px">
+        <div style="width: 100%; display: flex;">
+            <div style="display: inline-block; width: 20%; border: 2px solid #000000; float: left; text-align: center">
+                <p style="margin-top: 15px; margin-bottom: 15px;">Номер заказа</p>
+            </div>
+            <div style="display: inline-block; width: 80%; border: 2px solid #000000;">
+                <p style="float: left; margin-left: 25px; margin-top: 15px; margin-bottom: 15px;">Информация заказа</p>
+            </div>
+        </div>
+        {% for item in items %}
+        <div style="width: 100%; display: flex; height: 100%">
+            <div style="display: inline-block; width: 20%; border: 2px solid #000000; float: left; text-align: center;">
+                <p style="margin-top: 25px;">{{ item[0].id }}</p>
+            </div>
+            <div style="display: inline-block; width: 80%; border: 2px solid #000000;">
+                {% for product in item[1] %}
+                <p style="margin-left: 25px; margin-top: 15px; margin-bottom: 15px;">{{ product }}</p>
+                {% endfor %}
+                <div style="margin-left: 60%">
+                    <p style="margin-bottom: 8px;">Итоговая сумма: {{ item[0].amount }} ₽</p>
+                </div>
+                <div style="margin-left: 25px;">
+                    <p style="margin-bottom: 8px; float: left; margin-right: 10px;">Статус: </p>
+                    {% if item[0].status == 'Отменен' %}
+                    <p style="margin-bottom: 8px; color: #ff0000">{{ item[0].status}}</p>
+                    {% elif item[0].status == 'Ожидает оплаты' %}
+                    <p style="margin-bottom: 8px;">{{ item[0].status}}</p>
+                    {% else%}
+                    <p style="margin-bottom: 8px; color: #00dd00">{{ item[0].status}}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+    {% else %}
+    <h1>У вас пока что нет заказов.</h1>
+    <p>Чтобы у вас появились заказы, купите что-то в нашем магазине</p>
+    {% endif %}
+</div>
+
+{% endblock %}
