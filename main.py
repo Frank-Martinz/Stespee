@@ -1,5 +1,6 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_login import LoginManager, login_user, current_user, logout_user
+from flask_restful import Api, Resource
 from werkzeug.security import generate_password_hash
 from forms.loginform import LoginForm
 from forms.registform import RegistrationForm
@@ -15,7 +16,28 @@ import re
 import sys
 import requests
 
+
+class OrderResource(Resource):
+    def post(self, apikey, order_id, new_status):
+        with open('static/apikey.txt', 'r') as file:
+            data = file.read()
+            if data != apikey:
+                return jsonify({'Error': f'Apikey is not worked'})
+        db_sess = db_session.create_session()
+        order = db_sess.query(Order).filter(Order.id == order_id).first()
+        if order is None:
+            db_sess.close()
+            return jsonify({'Error': f'Not found order with id: {order_id}'})
+
+        order.status = new_status
+        db_sess.commit()
+        db_sess.close()
+        return jsonify({'success': 'OK'})
+
+
 application = Flask(__name__)
+api = Api(application)
+api.add_resource(OrderResource, '/api/<apikey>/<int:order_id>/<new_status>')
 application.config['SECRET_KEY'] = 'pfybvfqntcmcgjhnfvvfkmxbrbbltdjxrb'
 login_manager = LoginManager()
 login_manager.init_app(application)
